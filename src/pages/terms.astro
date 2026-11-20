@@ -1,0 +1,53 @@
+---
+import Page from '../layouts/Page.astro';
+import { SITE } from '../lib/site';
+// import { url } from '../lib/url';
+---
+
+<Page
+  title="Licenses and usage"
+  description="Which licenses Dev Equip products use, and what that means for using them in your games."
+>
+  <h2>Licenses</h2>
+  <p>Every product page lists the license that applies to it. Dev Equip uses two:</p>
+  <ul>
+    <li>
+      <strong>Designs, meshes and textures</strong> are released
+      under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.en" target="_blank" rel="noopener noreferrer">Creative Commons BY-NC-ND 4.0</a>.
+    </li>
+    <li>
+      <strong>Source code</strong> is released under
+      the <a href="https://github.com/Dev-Equip/Luau-Frameworks/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>.
+    </li>
+  </ul>
+  <p>When a product page shows both, each part of the product follows its own license.</p>
+
+  <h2>Selling and redistributing</h2>
+  <p>
+    You can't sell any Dev Equip product. You can distribute products for free, as long as you follow the license shown
+    on the product's page.
+  </p>
+
+  {/*
+  <h2>Community products</h2>
+  <p>
+    Products marked <strong>Community</strong> are made by trusted developers outside Dev Equip, and their product page
+    names who made them. They follow the license their developer gives, which is shown on the product's page.
+  </p>
+  <p>
+    A paid community product is sold by its developer, through their own store. Dev Equip doesn't take part in the sale:
+    your payment goes straight to the developer, and the developer is responsible for delivering the product, supporting
+    it and handling refunds. If something goes wrong with a purchase, contact the developer or the store you bought it
+    from first, and tell us if it isn't resolved so we can review the listing.
+  </p>
+  <p>
+    Developers who want to list a project can read how it works on <a href={url('/sell/')}>Sell on Dev Equip</a>.
+  </p>
+  */}
+
+  <h2>Questions</h2>
+  <p>
+    If you're unsure whether something is allowed, ask in
+    the <a href={SITE.discord} target="_blank" rel="noopener noreferrer">Discord</a> before you use it.
+  </p>
+</Page>

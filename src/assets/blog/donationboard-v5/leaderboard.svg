@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <rect width="1600" height="900" fill="#0f1218"/>
+  <rect x="40" y="40" width="1520" height="820" rx="24" fill="none" stroke="#2a3140" stroke-width="4" stroke-dasharray="20 14"/>
+  <g fill="#3b82f6" opacity="0.85" transform="translate(740 330)">
+    <rect width="120" height="90" rx="12" fill="none" stroke="#3b82f6" stroke-width="8"/>
+    <circle cx="38" cy="32" r="12"/>
+    <path d="M8 82 L48 46 L72 66 L92 50 L114 82 Z"/>
+  </g>
+  <text x="800" y="500" text-anchor="middle" font-family="Inter, Segoe UI, sans-serif" font-size="44" font-weight="700" fill="#e6e9ef">V5 leaderboard</text>
+  <text x="800" y="556" text-anchor="middle" font-family="Inter, Segoe UI, sans-serif" font-size="28" fill="#8a93a6">Screenshot coming soon</text>
+</svg>

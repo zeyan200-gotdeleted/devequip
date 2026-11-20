@@ -1,0 +1,316 @@
+---
+import { getImage } from 'astro:assets';
+import logo from '../assets/logo.png';
+import Layout from '../layouts/Layout.astro';
+import ProductCard from '../components/ProductCard.vue';
+import DiscordCard from '../components/DiscordCard.vue';
+import ProductIcon from '../components/ProductIcon.vue';
+import { categories, marketplaceItems, totalDownloads } from '../lib/catalog';
+import { downloadsLabel, formatCount } from '../lib/products';
+import { iconFor } from '../lib/productStyle';
+import { getDiscordServer } from '../lib/discord';
+import { SITE } from '../lib/site';
+import { url } from '../lib/url';
+
+const items = marketplaceItems();
+const popular = [...items].sort((a, b) => b.downloads - a.downloads);
+const [featured, ...runnersUp] = popular.slice(0, 3).map((p, i) => ({ ...p, rank: i + 1 }));
+const downloads = formatCount(totalDownloads());
+const discord = await getDiscordServer();
+const discordLogo = await getImage({ src: logo, width: 96, height: 96, format: 'png' });
+
+const highlights = [
+  { label: "Editor's Pick", value: 'Donation Board', text: 'Recommended by both experts and critics.' },
+  { label: 'Downloads', value: `${downloads}+`, text: 'Across all Dev Equip products on Roblox.' },
+  { label: 'Trending', value: 'Creator Store', text: 'Donation Board reached peak trending.' },
+];
+
+const features = [
+  {
+    title: 'Game-ready assets',
+    text: 'Flexible, high-quality assets made by an experienced developer, for every genre.',
+    icon: 'M2.25 3h1.39c.51 0 .96.35 1.09.84l.38 1.44m0 0L6.6 12.6a2.25 2.25 0 0 0 2.18 1.65h8.1a2.25 2.25 0 0 0 2.17-1.66l1.7-6.31H5.11ZM7.5 18.75a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm11.25 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z',
+  },
+  {
+    title: 'Read the source',
+    text: 'Scripts and frameworks are open source under MIT. Browse every file before you use it.',
+    icon: 'M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5',
+  },
+  {
+    title: 'Community resources',
+    text: "Download resources from Dev Equip's community, full of professional developers.",
+    icon: 'M18 18.72a9.09 9.09 0 0 0 3.74-.48 3 3 0 0 0-4.68-2.72m.94 3.2v.03c0 .22-.01.44-.04.66A11.94 11.94 0 0 1 12 21c-2.17 0-4.2-.58-5.96-1.59a6.06 6.06 0 0 1-.04-.69m12 0a5.97 5.97 0 0 0-.94-3.2m0 0A5.99 5.99 0 0 0 12 12.75a6 6 0 0 0-5.06 2.78m0 0a3 3 0 0 0-4.68 2.72 8.99 8.99 0 0 0 3.74.48m.94-3.2a5.97 5.97 0 0 0-.94 3.2M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z',
+  },
+  {
+    title: 'Build your team',
+    text: 'Find people to work with through advertisements in the Discord, and build games together.',
+    icon: 'm21 21-5.2-5.2m0 0A7.5 7.5 0 1 0 5.2 5.2a7.5 7.5 0 0 0 10.6 10.6Z',
+  },
+];
+
+const showcase = {
+  main: { id: 'donationboard', name: 'Donation Board', src: url('/images/products/donationboard/2.webp'), width: 1292, height: 825 },
+  inset: { id: 'nexusdynamics', name: 'Nexus Dynamics', src: url('/images/products/nexusdynamics/5.webp'), width: 1600, height: 900 },
+};
+
+const faq = [
+  {
+    q: 'Can I request a feature or suggest improvements?',
+    a: `Yes! We value your feedback and suggestions. Visit our <a href="${SITE.discord}" target="_blank" rel="noopener noreferrer">Discord</a> to submit your ideas. Our team reviews all submissions and considers them for the future.`,
+  },
+  {
+    q: 'How can I join the Dev Equip team?',
+    a: 'The Dev Equip team will announce opportunities to join the team in the <a href="${SITE.discord}" target="_blank" rel="noopener noreferrer">Discord</a>.',
+  },
+  {
+    q: "My product isn't working, can I get help with the installation?",
+    a: `You can join our <a href="${SITE.discord}" target="_blank" rel="noopener noreferrer">Discord</a> and ask a staff member or fellow developer to help you. The <a href="${url('/docs/')}">docs</a> also cover installing and the game settings most products need.`,
+  },
+  {
+    q: 'How do I report a bug or issue?',
+    a: `In the <a href="${SITE.discord}" target="_blank" rel="noopener noreferrer">Discord</a>, open a bug report ticket or use the bug report channel. Our team will look into it as soon as possible.`,
+  },
+  {
+    q: 'Can I sell or redistribute a Dev Equip product?',
+    a: "You can sell your products that you make with Dev Equip products, but you cannot sell or redistribute the Dev Equip products themselves. You can read more about this in our <a href='${url('/docs/terms/')}'>Terms of Service</a>.",
+  },
+];
+
+const discordPerks = [
+  { title: 'Get help with setup', text: 'Staff and fellow developers help you install and configure products.' },
+  { title: 'Suggest features', text: 'Share ideas for products; the team reviews every submission.' },
+  { title: 'Report bugs', text: 'Open a bug report ticket or use the bug report channel.' },
+  { title: 'Find teammates', text: 'Advertise and team up with other developers to build games.' },
+];
+
+const ARROW = 'M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3';
+---
+
+<Layout active="home">
+  <section class="screen hero relative overflow-hidden -mt-20">
+    <div class="relative pt-20 flex-1 flex flex-col justify-center">
+      <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1440 900" preserveAspectRatio="xMaxYMax slice" aria-hidden="true">
+        <polygon points="0,0 280,0 0,280" fill="#0a1628" />
+        <polygon points="700,900 1440,160 1440,900" fill="#081428" />
+        <polygon points="1000,900 1440,460 1440,900" fill="#0b2140" />
+        <polygon points="1200,900 1440,660 1440,900" fill="#00254c" />
+        <polygon points="1320,900 1440,780 1440,900" fill="#1a8cff" />
+      </svg>
+
+      <div class="relative container-site pt-14 sm:pt-20 lg:pt-24 pb-16 sm:pb-24 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] gap-14 lg:gap-16 items-center">
+        <div class="min-w-0">
+          <p class="mb-7 text-sm text-fg-2">Trusted by Users Worldwide</p>
+          <h1 class="font-display font-bold text-fg text-[3rem] sm:text-7xl xl:text-[5.5rem] leading-[0.92] tracking-[-0.045em] mb-7">
+            Welcome<br /><span class="text-brand">Developer</span>
+          </h1>
+          <p class="lead max-w-md mb-10">Equip yourself with game-ready assets made by professional developers.</p>
+          <div class="flex flex-wrap items-center gap-x-7 gap-y-4">
+            <a href={url('/marketplace/')} class="btn btn-primary !h-12 !px-6">Browse the Marketplace</a>
+            <a href={url('/docs/')} class="link-arrow text-sm">
+              Read the docs
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d={ARROW}></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-art min-w-0">
+          <div class="grid grid-cols-2 sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] gap-px overflow-hidden rounded-xl border border-line-2 bg-line-2" role="group" aria-label="Most downloaded products">
+            <a href={url(`/products/${featured.id}/`)} class="col-span-2 sm:col-span-1 sm:row-span-2 flex flex-col bg-panel hover:bg-panel-2 transition-colors">
+              <img src={featured.cover.src} alt="" width={featured.cover.width} height={featured.cover.height} class="block w-full aspect-video object-cover" />
+              <div class="flex-1 flex flex-col p-5 sm:p-6">
+                <p class="font-mono text-[11px] tracking-wide text-fg-3">No. 1 · Most downloaded</p>
+                <h2 class="font-display text-2xl font-bold tracking-tight text-fg mt-2 mb-2">{featured.name}</h2>
+                <p class="text-sm leading-relaxed text-fg-2 line-clamp-3 mb-6">{featured.summary}</p>
+                <div class="mt-auto flex items-center justify-between gap-4 pt-4 border-t border-line text-sm">
+                  <span class="text-fg-2">{downloadsLabel(featured.downloads)}</span>
+                  <span class="link-arrow">
+                    View
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d={ARROW} />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </a>
+            {
+              runnersUp.map((p) => (
+                <a href={url(`/products/${p.id}/`)} class="flex flex-col bg-panel hover:bg-panel-2 transition-colors">
+                  <img src={p.cover.src} alt="" width={p.cover.width} height={p.cover.height} class="block w-full aspect-video object-cover" />
+                  <div class="flex-1 flex flex-col p-4">
+                    <p class="font-mono text-[11px] tracking-wide text-fg-3">No. {p.rank}</p>
+                    <h2 class="text-sm font-semibold leading-snug text-fg mt-1.5 mb-3">{p.name}</h2>
+                    <span class="mt-auto text-sm text-fg-2">{downloadsLabel(p.downloads)}</span>
+                  </div>
+                </a>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="relative border-t border-line">
+      <dl class="container-site grid grid-cols-1 sm:grid-cols-3">
+        {
+          highlights.map((h, i) => (
+            <div class:list={['flex flex-col py-8 sm:py-10 sm:px-8', i === 0 ? 'sm:pl-0' : 'border-t sm:border-t-0 sm:border-l border-line']}>
+              <dt class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-fg-3 mb-3">{h.label}</dt>
+              <dd class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-fg mb-1.5">{h.value}</dd>
+              <dd class="text-sm text-fg-2">{h.text}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section class="screen section border-t border-line overflow-hidden">
+    <div class="container-site grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-14 lg:gap-20 items-center">
+      <div class="relative pb-16 sm:pb-20 lg:pb-24 pr-6 sm:pr-14">
+        <a href={url(`/products/${showcase.main.id}/`)} class="group block overflow-hidden rounded-xl border border-line-2 bg-panel">
+          <img src={showcase.main.src} width={showcase.main.width} height={showcase.main.height} alt={`${showcase.main.name} in a game`} loading="lazy" class="block w-full h-auto" />
+          <span class="flex items-center justify-between gap-3 px-4 h-11 border-t border-line text-sm">
+            <span class="font-semibold text-fg group-hover:text-brand-2 transition-colors">{showcase.main.name}</span>
+            <span class="text-fg-3">Most downloaded</span>
+          </span>
+        </a>
+        <a
+          href={url(`/products/${showcase.inset.id}/`)}
+          class="group absolute right-0 bottom-0 w-[58%] overflow-hidden rounded-xl border border-line-2 bg-panel shadow-[0_24px_60px_-20px_rgb(0_0_0/0.9)]"
+        >
+          <img src={showcase.inset.src} width={showcase.inset.width} height={showcase.inset.height} alt={`${showcase.inset.name} menu`} loading="lazy" class="block w-full h-auto" />
+          <span class="flex items-center justify-between gap-3 px-4 h-10 border-t border-line text-xs sm:text-sm">
+            <span class="font-semibold text-fg group-hover:text-brand-2 transition-colors truncate">{showcase.inset.name}</span>
+            <span class="hidden sm:inline text-fg-3">Admin Panel</span>
+          </span>
+        </a>
+      </div>
+
+      <div>
+        <p class="eyebrow mb-4">Why Dev Equip</p>
+        <h2 class="section-title mb-5">Develop your games like a professional developer</h2>
+        <p class="lead mb-10 max-w-md">
+          Every product is built to be the best of its kind: easy to install, friendly to use and backed by optimized code.
+        </p>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-7 mb-10">
+          {
+            features.map((f) => (
+              <li class="flex gap-4">
+                <span class="icon-tile !w-10 !h-10" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.75" stroke="currentColor" class="w-5 h-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d={f.icon} />
+                  </svg>
+                </span>
+                <span>
+                  <span class="block font-display text-base font-bold text-fg mb-1">{f.title}</span>
+                  <span class="block text-sm leading-relaxed text-fg-2">{f.text}</span>
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+        <a href={url('/marketplace/')} class="btn btn-primary">Explore the products</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen section border-t border-line bg-panel/40">
+    <div class="container-site">
+      <div class="flex flex-wrap items-end justify-between gap-6 mb-10">
+        <div>
+          <p class="eyebrow mb-4">Most downloaded</p>
+          <h2 class="section-title">Popular right now</h2>
+        </div>
+        <a href={url('/marketplace/')} class="link-arrow text-sm">
+          View all {items.length} products
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d={ARROW}></path>
+          </svg>
+        </a>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-8">
+        {popular.slice(0, 6).map((p) => <ProductCard product={p} href={url(`/products/${p.id}/`)} />)}
+      </div>
+
+      <h3 class="font-display text-xl font-bold text-fg mt-20 mb-6">Browse by category</h3>
+      <ul class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-7 overflow-hidden rounded-lg border border-line bg-page">
+        {
+          categories().map((c) => (
+            <li class="shadow-[1px_0_0_var(--color-line),0_1px_0_var(--color-line)]">
+              <a
+                href={url(`/marketplace/?category=${encodeURIComponent(c.name)}`)}
+                class="group flex flex-col justify-between gap-8 h-full p-4 transition-colors hover:bg-panel-2"
+                aria-label={`${c.name} ${c.count} ${c.count === 1 ? 'product' : 'products'}`}
+              >
+                <span class="flex items-start justify-between">
+                  <ProductIcon icon={iconFor(c.name)} color="currentColor" class="w-5 h-5 text-fg-3 transition-colors group-hover:text-brand-2" />
+                  <span class="font-mono text-xs tabular-nums text-fg-3">{String(c.count).padStart(2, '0')}</span>
+                </span>
+                <span class="text-sm font-semibold text-fg">{c.name}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="screen section border-t border-line">
+    <div class="container-site grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)] gap-10 lg:gap-16">
+      <div>
+        <p class="eyebrow mb-4">Support</p>
+        <h2 class="section-title mb-5">Need help?</h2>
+        <p class="lead mb-8 max-w-sm">Answers to the questions we get most. Can't find yours? Ask us directly.</p>
+        <div class="flex flex-wrap gap-3">
+          <a href={url('/support/')} class="btn btn-secondary">Contact support</a>
+          <a href={SITE.discord} class="btn btn-secondary" target="_blank" rel="noopener noreferrer">Ask in Discord</a>
+        </div>
+      </div>
+      <div class="border-t border-line">
+        {
+          faq.map((item, i) => (
+            <details class="faq" open={i === 0}>
+              <summary>{item.q}</summary>
+              <p set:html={item.a} />
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="screen relative overflow-hidden bg-navy border-t border-line-2">
+    <svg class="hidden lg:block absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1440 520" preserveAspectRatio="xMaxYMax slice" aria-hidden="true">
+      <polygon points="820,520 1440,-100 1440,520" fill="#00305f" />
+      <polygon points="1080,520 1440,160 1440,520" fill="#003a73" />
+      <polygon points="1260,520 1440,340 1440,520" fill="#1a8cff" />
+    </svg>
+    <div class="relative container-site py-16 sm:py-24 grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-12 lg:gap-20 lg:items-center">
+      <div>
+        <p class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8fc6ff] mb-4">Community</p>
+        <h2 class="section-title !text-white mb-4">Ready to simplify your developing career?</h2>
+        <p class="lead !text-[#c3d5ea] max-w-lg mb-8">Join thousands of developers in the Dev Equip community.</p>
+        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 border-t border-white/15">
+          {
+            discordPerks.map((perk) => (
+              <li class="flex items-start gap-3 py-4 border-b border-white/15">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 shrink-0 mt-1 text-[#8fc6ff]" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+                <span>
+                  <span class="block font-semibold text-white">{perk.title}</span>
+                  <span class="block text-sm text-[#c3d5ea] mt-0.5">{perk.text}</span>
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="w-full max-w-md lg:justify-self-end">
+        <DiscordCard client:idle initial={discord} invite={SITE.discord} logo={discordLogo.src} />
+      </div>
+    </div>
+  </section>
+</Layout>

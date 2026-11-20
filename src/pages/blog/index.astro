@@ -1,0 +1,131 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { formatDate, getPosts, getTags, readingTime } from '../../lib/blog';
+import { SITE } from '../../lib/site';
+import { url } from '../../lib/url';
+
+const posts = await getPosts();
+const tags = getTags(posts);
+const [featured, ...rest] = posts;
+---
+
+<Layout
+  title="Blog | Dev Equip"
+  description="Release notes, product updates and guides from the Dev Equip team."
+  active="blog"
+>
+  <section class="container-site pt-10 sm:pt-12">
+    <h1 class="page-title">News and updates</h1>
+    <p class="page-lead">
+      Release notes, product updates and guides from the Dev Equip team, for Roblox developers using our products.
+    </p>
+    <p class="mt-2 text-sm text-fg-3">
+      {posts.length} {posts.length === 1 ? 'post' : 'posts'}
+      {featured && <> · Last updated {formatDate(featured.data.date)}</>}
+    </p>
+  </section>
+
+  <div class="container-site pt-8 pb-16">
+    {
+      !featured ? (
+        <p class="text-fg-2">No posts yet. Check back soon.</p>
+      ) : (
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_16rem] gap-10 lg:gap-12">
+          <div class="min-w-0">
+            <a href={url(`/blog/${featured.id}/`)} class="group block pb-10 mb-2 border-b border-line" data-post data-tags={featured.data.tags.join('|')}>
+              <p class="text-sm text-fg-3 mb-3">
+                <time datetime={featured.data.date.toISOString()}>{formatDate(featured.data.date)}</time>
+                {featured.data.draft && <span class="text-amber-400"> · Draft</span>}
+              </p>
+              <h2 class="font-display text-2xl sm:text-3xl font-bold tracking-tight text-fg group-hover:underline underline-offset-4 decoration-line-2 mb-3 break-words">
+                {featured.data.title}
+              </h2>
+              <p class="lead mb-4 break-words">{featured.data.description}</p>
+              <p class="text-sm text-fg-3">
+                {featured.data.author} · {readingTime(featured)}
+                {featured.data.tags.length > 0 && <> · {featured.data.tags.join(', ')}</>}
+              </p>
+            </a>
+
+            {rest.length > 0 && (
+              <ul class="divide-y divide-line">
+                {rest.map((post) => (
+                  <li data-post data-tags={post.data.tags.join('|')}>
+                    <a href={url(`/blog/${post.id}/`)} class="group block py-6">
+                      <p class="text-sm text-fg-3 mb-1.5">
+                        <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+                        {post.data.draft && <span class="text-amber-400"> · Draft</span>}
+                      </p>
+                      <h3 class="font-display text-lg font-semibold tracking-tight text-fg group-hover:underline underline-offset-4 decoration-line-2 mb-1.5 break-words">
+                        {post.data.title}
+                      </h3>
+                      <p class="text-sm leading-relaxed text-fg-2 break-words">{post.data.description}</p>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p id="no-matches" class="hidden py-6 text-fg-2">No posts with this tag yet.</p>
+          </div>
+
+          <aside class="min-w-0 self-start lg:sticky lg:top-24 lg:border-l lg:border-line lg:pl-8 flex flex-col gap-8 text-sm">
+            {tags.length > 0 && (
+              <div>
+                <h2 class="font-semibold text-fg mb-2">Topics</h2>
+                <div class="flex lg:flex-col flex-wrap gap-1 lg:gap-0 -mx-2.5">
+                  <button type="button" class="tag-filter flex items-center h-8 px-2.5 rounded text-left text-fg-3 hover:text-fg aria-pressed:bg-white/[0.08] aria-pressed:text-fg cursor-pointer" aria-pressed="true" data-tag="">
+                    All <span class="ml-auto pl-3 text-xs tabular-nums text-fg-3">{posts.length}</span>
+                  </button>
+                  {tags.map((tag) => (
+                    <button type="button" class="tag-filter flex items-center h-8 px-2.5 rounded text-left text-fg-3 hover:text-fg aria-pressed:bg-white/[0.08] aria-pressed:text-fg cursor-pointer" aria-pressed="false" data-tag={tag.name}>
+                      {tag.name} <span class="ml-auto pl-3 text-xs tabular-nums text-fg-3">{tag.count}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div class="pt-6 border-t border-line">
+              <h2 class="font-semibold text-fg mb-1.5">Stay in the loop</h2>
+              <p class="text-fg-3 leading-relaxed mb-3">Follow updates and suggest topics for new posts.</p>
+              <a href={SITE.discord} class="inline-flex items-center gap-1.5 text-fg hover:text-brand-2 transition-colors" target="_blank" rel="noopener noreferrer">
+                Join the Discord
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" /></svg>
+              </a>
+            </div>
+          </aside>
+        </div>
+      )
+    }
+  </div>
+</Layout>
+
+<script>
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>('.tag-filter')];
+  const posts = [...document.querySelectorAll<HTMLElement>('[data-post]')];
+  const empty = document.getElementById('no-matches');
+
+  function apply(tag: string) {
+    let shown = 0;
+    for (const post of posts) {
+      const match = !tag || (post.dataset.tags ?? '').split('|').includes(tag);
+      post.hidden = !match;
+      if (match) shown++;
+    }
+    for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.tag === tag));
+    empty?.classList.toggle('hidden', shown > 0);
+  }
+
+  for (const b of buttons) {
+    b.addEventListener('click', () => {
+      const tag = b.dataset.tag ?? '';
+      const params = new URLSearchParams(location.search);
+      if (tag) params.set('tag', tag);
+      else params.delete('tag');
+      history.replaceState(null, '', `${location.pathname}${params.size ? `?${params}` : ''}`);
+      apply(tag);
+    });
+  }
+
+  const initial = new URLSearchParams(location.search).get('tag') ?? '';
+  if (buttons.some((b) => b.dataset.tag === initial)) apply(initial);
+</script>

@@ -1,0 +1,19 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { url } from '../lib/url';
+---
+
+<Layout title="Page not found | Dev Equip" noindex>
+  <section class="container-site min-h-[65vh] flex flex-col items-center justify-center text-center py-24">
+    <p class="text-sm text-fg-3 mb-2">404</p>
+    <h1 class="page-title">This page could not be found</h1>
+    <p class="page-lead max-w-md mb-8">
+      The link may be out of date, or the product may have moved. The marketplace has everything that's currently
+      listed.
+    </p>
+    <div class="flex flex-wrap gap-3 justify-center">
+      <a href={url('/marketplace/')} class="btn btn-primary">Browse the Marketplace</a>
+      <a href={url('/')} class="btn btn-secondary">Back to home</a>
+    </div>
+  </section>
+</Layout>

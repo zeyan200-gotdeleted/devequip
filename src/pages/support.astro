@@ -1,0 +1,60 @@
+---
+import Page from '../layouts/Page.astro';
+import { SITE } from '../lib/site';
+import { url } from '../lib/url';
+
+const faq = [
+  {
+    q: 'Can I request a feature or suggest improvements?',
+    a: `Yes! We value your feedback and suggestions. Visit our <a href="${SITE.discord}" target="_blank" rel="noopener noreferrer">Discord</a> to submit your ideas. Our team reviews all submissions and considers them for the future.`,
+  },
+  {
+    q: "My product isn't working, can I get help with the installation?",
+    a: `Join our <a href="${SITE.discord}" target="_blank" rel="noopener noreferrer">Discord</a> and ask a staff member or fellow developer to help you. The <a href="${url('/docs/')}">docs</a> cover installing and the game settings most products need.`,
+  },
+  {
+    q: 'How do I report a bug or issue?',
+    a: `In the Discord, open a bug report ticket or use the bug report channel. Our team will look into it as soon as possible.`,
+  },
+  {
+    q: 'Can I sell or redistribute a Dev Equip product?',
+    a: `You can't sell any of our products, but you can distribute them for free as long as you follow the license shown on each product's page. See <a href="${url('/terms/')}">Licenses and usage</a>.`,
+  },
+  {
+    q: 'How can I contribute to a Dev Equip product?',
+    a: 'Contributions are very welcome, through the DevForum or the Discord. You can contribute to any product if the developer accepts your suggestion or fix.',
+  },
+  {
+    q: 'How can I join the Dev Equip team?',
+    a: 'The Dev Equip team will announce opportunities to join the team in the Discord, until we have a careers page.',
+  },
+  {
+    q: 'How did the developer of Dev Equip learn scripting?',
+    a: 'Through trial and error, DevForum support threads and discussions, and reading the documentation. For learning on YouTube, we recommend AlvinBLOX, RoBuilder and TheDevKing.',
+  },
+];
+---
+
+<Page
+  title="Support"
+  description="Get help with a Dev Equip product, report a bug or suggest a feature."
+  active="support"
+>
+  <h2>Get in touch</h2>
+  <p>
+    The fastest way to get help is the <a href={SITE.discord} target="_blank" rel="noopener noreferrer">Dev Equip Discord</a>,
+    where staff and other developers can answer questions. The Discord is for people aged 13 and over.
+  </p>
+
+  <h2>Frequently asked questions</h2>
+  <div class="border-t border-line">
+    {
+      faq.map((item) => (
+        <details class="faq">
+          <summary>{item.q}</summary>
+          <p set:html={item.a} />
+        </details>
+      ))
+    }
+  </div>
+</Page>

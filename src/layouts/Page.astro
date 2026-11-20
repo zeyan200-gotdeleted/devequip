@@ -1,0 +1,23 @@
+---
+import Layout from './Layout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  active?: 'docs' | 'support';
+}
+
+const { title, description, active } = Astro.props;
+---
+
+<Layout title={`${title} | Dev Equip`} description={description} active={active}>
+  <section class="container-site max-w-4xl pt-10 sm:pt-12">
+    <h1 class="page-title">{title}</h1>
+    <p class="page-lead">{description}</p>
+  </section>
+  <div class="container-site max-w-4xl pt-10 pb-16">
+    <div class="prose">
+      <slot />
+    </div>
+  </div>
+</Layout>

@@ -1,0 +1,449 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ProductCard from '../../components/ProductCard.vue';
+import SourceBrowser from '../../components/SourceBrowser.vue';
+import { marketplaceItems, products } from '../../lib/catalog';
+import { downloadsLabel, formatDate, isFree, relatedTo, storeName, type MarketplaceItem, type Product } from '../../lib/products';
+import { SITE } from '../../lib/site';
+import { url } from '../../lib/url';
+
+export function getStaticPaths() {
+  const items = marketplaceItems();
+  return products.map((product) => ({ params: { id: product.id }, props: { product, related: relatedTo(product, items) } }));
+}
+
+interface Props {
+  product: Product;
+  related: MarketplaceItem[];
+}
+
+const { product, related } = Astro.props;
+const absolute = (path: string) => new URL(url(path), Astro.site).href;
+
+const EMOJI = /\s(?=\p{Extended_Pictographic})/u;
+const overview = product.overview.filter((text) => text !== product.summary).map((text) => {
+  const colon = text.indexOf(':');
+  const items = colon > 0 ? text.slice(colon + 1).trim().split(EMOJI) : [];
+  return items.length >= 2 ? { lead: text.slice(0, colon + 1), items } : { lead: text, items: [] };
+});
+const hasMain =
+  overview.length > 0 || !!product.docs || product.features.length > 0 || product.compatibility.length > 0 || !!product.files;
+
+const links = product.links.flatMap((link) =>
+  link.store ? [{ label: 'Creator Store', url: link.store }, { label: link.label, url: link.url }] : [link],
+);
+const [primary, ...secondary] = links;
+const isLocal = (link: { url: string }) => link.url.startsWith('/');
+const linkAttrs = (link: { url: string }) =>
+  isLocal(link) ? { href: url(link.url), download: '' } : { href: link.url, target: '_blank', rel: 'noopener noreferrer' };
+const primaryLabel = primary?.label === 'Creator Store' ? 'Get it on the Creator Store' : `Download ${primary?.label}`;
+
+const free = isFree(product.price);
+const sale = product.sale;
+const store = sale ? storeName(sale) : null;
+
+const details = [
+  { label: 'Version', value: product.version },
+  { label: 'Engine', value: product.engine },
+  { label: 'Released', value: formatDate(product.created) },
+  { label: 'Updated', value: formatDate(product.updated) },
+  { label: 'Publisher', value: product.community ? `${product.developer} (community)` : product.publisher },
+  { label: 'Developer', value: product.developer },
+];
+
+const structuredData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: product.name,
+    description: product.summary,
+    url: absolute(`/products/${product.id}/`),
+    image: absolute(product.images[0].src),
+    applicationCategory: 'GameApplication',
+    operatingSystem: product.engine,
+    softwareVersion: product.version,
+    ...(free && { offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' } }),
+  },
+];
+
+const ARROW = 'M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3';
+const BACK_ARROW = 'M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18';
+const EXTERNAL =
+  'M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25';
+---
+
+<Layout title={`${product.name} | Dev Equip`} description={product.summary} active="marketplace" image={`/og/${product.id}.png`}>
+  <script
+    slot="head"
+    type="application/ld+json"
+    is:inline
+    set:html={JSON.stringify(structuredData).replace(/</g, '\\u003c')}
+  />
+
+  <div class="container-site pt-6 sm:pt-8 pb-20">
+    <a href={url('/marketplace/')} class="inline-flex items-center gap-1.5 mb-6 text-sm text-fg-3 hover:text-fg transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d={BACK_ARROW} />
+      </svg>
+      Marketplace
+    </a>
+    <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] gap-8 lg:gap-12">
+      <div class="min-w-0">
+        <div class="card overflow-hidden">
+          <img
+            id="gallery-main"
+            src={url(product.images[0].src)}
+            width={product.images[0].width}
+            height={product.images[0].height}
+            alt={`${product.name} preview`}
+            class="block w-full h-auto"
+          />
+        </div>
+        {
+          product.images.length > 1 && (
+            <div class="grid grid-cols-4 sm:grid-cols-5 gap-2 mt-3" aria-label="Gallery">
+              {product.images.map((image, i) => (
+                <button
+                  type="button"
+                  class="gallery-thumb aspect-video overflow-hidden rounded-md border border-line hover:border-line-2 aria-pressed:border-brand cursor-pointer"
+                  aria-pressed={i === 0 ? 'true' : 'false'}
+                  data-src={url(image.src)}
+                  data-width={image.width}
+                  data-height={image.height}
+                >
+                  <img src={url(image.src)} alt={`Show image ${i + 1}`} loading="lazy" class="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )
+        }
+      </div>
+
+      <div class="min-w-0">
+        <h1 class="font-display text-3xl sm:text-4xl font-bold tracking-tight text-fg mb-4 break-words">{product.name}</h1>
+
+        <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-fg-2 mb-5">
+          <span class="font-semibold text-fg">{product.price}</span>
+          <a href={url(`/marketplace/?category=${encodeURIComponent(product.category)}`)} class="hover:text-fg underline-offset-4 hover:underline">
+            {product.category}
+          </a>
+          <span>{product.engine}</span>
+          {product.community && <span>Community</span>}
+          <span class="inline-flex items-center gap-1.5" aria-label={`Rated ${product.rating} out of 5`}>
+            <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-star" aria-hidden="true">
+              <path d="M10.87 1.83a.97.97 0 0 0-1.74 0L7.04 6.07l-4.68.68a.97.97 0 0 0-.54 1.65l3.39 3.3-.8 4.66a.97.97 0 0 0 1.41 1.02L10 15.18l4.18 2.2a.97.97 0 0 0 1.41-1.02l-.8-4.66 3.39-3.3a.97.97 0 0 0-.54-1.65l-4.68-.68-2.09-4.24Z" />
+            </svg>
+            <span class="font-semibold text-fg">{product.rating.toFixed(1)}</span>
+          </span>
+          <span>{downloadsLabel(product.downloads)}</span>
+          <span>Updated {formatDate(product.updated)}</span>
+        </div>
+
+        <p class="lead mb-7">{product.summary}</p>
+
+        {
+          product.discontinued && (
+            <p class="mb-6 px-4 py-3 rounded-lg border border-rose-400/30 bg-rose-400/5 text-sm text-rose-300">
+              This product has been discontinued and isn't recommended for new games.
+            </p>
+          )
+        }
+
+        <div class="flex flex-col gap-2.5 mb-6">
+          {
+            sale && (
+              <a href={sale.url} class="btn btn-primary w-full !h-12" target="_blank" rel="noopener noreferrer">
+                Buy on {store} · {product.price}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d={EXTERNAL} />
+                </svg>
+              </a>
+            )
+          }
+          {
+            !sale && primary && (
+              <a {...linkAttrs(primary)} id="primary-link" class="btn btn-primary w-full !h-12">
+                {primaryLabel}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d={EXTERNAL} />
+                </svg>
+              </a>
+            )
+          }
+          {
+            product.variants && product.variants.length > 0 && (
+              <div class="flex gap-2.5">
+                <select id="variant-select" aria-label="Choose which one to download" class="field h-11 px-3 text-sm cursor-pointer flex-1 min-w-0">
+                  {product.variants.map((v) => (
+                    <option value={url(v.url)} data-store={v.store}>{v.label}</option>
+                  ))}
+                </select>
+                <a id="variant-download" href={url(product.variants[0].url)} download="" class="btn btn-secondary shrink-0">
+                  Download
+                </a>
+              </div>
+            )
+          }
+          {
+            ((sale ? links : secondary).length > 0 || product.files) && (
+              <div class="grid grid-cols-2 gap-2.5">
+                {(sale ? links : secondary).map((link) => (
+                  <a {...linkAttrs(link)} class="btn btn-secondary">
+                    {link.label === 'GitHub' ? 'GitHub' : `Download ${link.label}`}
+                  </a>
+                ))}
+                {product.files && (
+                  <a href="#source" class="btn btn-secondary">
+                    Browse source
+                  </a>
+                )}
+              </div>
+            )
+          }
+        </div>
+
+        {
+          product.community && (
+            <div class="flex gap-3 px-4 py-3.5 mb-4 rounded-lg border border-line bg-panel text-sm">
+              <svg viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 shrink-0 text-brand-2" aria-hidden="true">
+                <path d="M10 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM1.49 15.33a.78.78 0 0 1-.36-.73 5 5 0 0 1 7.45-3.99A6.48 6.48 0 0 0 6.5 15.5v.1a7.97 7.97 0 0 1-5.01-.27ZM18.51 15.33a8 8 0 0 1-5.01.27v-.1a6.48 6.48 0 0 0-2.08-4.89 5 5 0 0 1 7.45 3.99.78.78 0 0 1-.36.73ZM18 8a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM5.3 16.4a.77.77 0 0 1-.3-.67 5 5 0 0 1 10 0 .77.77 0 0 1-.3.67A9.96 9.96 0 0 1 10 18a9.96 9.96 0 0 1-4.7-1.6Z" />
+              </svg>
+              <p class="text-fg-2">
+                <span class="text-fg font-semibold">Made by {product.developer}</span>, a trusted community developer.{' '}
+                {
+                  sale
+                    ? <>Sold and delivered by them through {store}: your payment goes straight to the developer, not to Dev Equip. Support and refunds are handled by the developer.</>
+                    : <>Shared for free with the community.</>
+                }{' '}
+                <a href={url('/sell/')} class="text-brand-2 hover:text-fg underline underline-offset-2">How community products work</a>
+              </p>
+            </div>
+          )
+        }
+        {
+          product.requires.length > 0 && (
+            <div class="flex gap-3 px-4 py-3.5 rounded-lg border border-line bg-panel text-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="w-5 h-5 shrink-0 text-brand-2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+              </svg>
+              <p class="text-fg-2">
+                <span class="text-fg font-semibold">Needs these game settings: </span>
+                {product.requires.join(', ')}.{' '}
+                <a href={url('/docs/#game-settings')} class="text-brand-2 hover:text-fg underline underline-offset-2">How to enable them</a>
+              </p>
+            </div>
+          )
+        }
+      </div>
+    </div>
+
+    <div class:list={['grid grid-cols-1 gap-10 lg:gap-14 mt-16', hasMain && 'lg:grid-cols-[minmax(0,1fr)_20rem]']}>
+      {hasMain && <div class="min-w-0 flex flex-col gap-14">
+        {(overview.length > 0 || product.docs) && (
+        <section aria-labelledby="overview-heading">
+          <h2 id="overview-heading" class="font-display text-2xl font-bold tracking-tight text-fg mb-5">Overview</h2>
+          <div class="flex flex-col gap-4 text-[15px] leading-relaxed text-fg-2 max-w-3xl">
+            {
+              overview.map((p) =>
+                p.items.length ? (
+                  <div>
+                    <p class="mb-3">{p.lead}</p>
+                    <ul class="flex flex-col gap-2">
+                      {p.items.map((item) => (
+                        <li class="pl-4 border-l-2 border-line-2">{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <p>{p.lead}</p>
+                ),
+              )
+            }
+          </div>
+          {
+            product.docs && (
+              <a
+                {...(product.docs.startsWith('/')
+                  ? { href: url(product.docs) }
+                  : { href: product.docs, target: '_blank', rel: 'noopener noreferrer' })}
+                class="link-arrow text-sm mt-6"
+              >
+                Read the documentation
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d={ARROW} />
+                </svg>
+              </a>
+            )
+          }
+        </section>
+        )}
+
+        {
+          product.features.length > 0 && (
+            <section aria-labelledby="features-heading">
+              <h2 id="features-heading" class="font-display text-2xl font-bold tracking-tight text-fg mb-5">Features</h2>
+              <ul class="card divide-y divide-line">
+                {product.features.map((f) => (
+                  <li class="flex gap-4 px-5 py-4.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 mt-1 text-brand-2 shrink-0" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                    </svg>
+                    <div class="min-w-0">
+                      <h3 class="font-semibold text-fg mb-1">{f.title}</h3>
+                      <p class="text-sm leading-relaxed text-fg-2 max-w-2xl">{f.text}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+
+        {
+          product.compatibility.length > 0 && (
+            <section aria-labelledby="compat-heading">
+              <h2 id="compat-heading" class="font-display text-2xl font-bold tracking-tight text-fg mb-5">Works with</h2>
+              <ul class="flex flex-col gap-2 text-[15px] text-fg-2">
+                {product.compatibility.map((c) => (
+                  <li class="flex items-center gap-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                    </svg>
+                    {c}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+
+        {
+          product.files && (
+            <section id="source" aria-labelledby="source-heading">
+              <h2 id="source-heading" class="font-display text-2xl font-bold tracking-tight text-fg mb-2">Source code</h2>
+              <p class="text-sm text-fg-2 mb-5">Read every file right here before you add it to your game.</p>
+              <SourceBrowser client:visible files={product.files} source={product.source} />
+            </section>
+          )
+        }
+      </div>}
+
+      <aside
+        class:list={[
+          'min-w-0 text-sm',
+          hasMain
+            ? 'self-start flex flex-col divide-y divide-line [&>*]:py-6 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0 lg:border-l lg:border-line lg:pl-8'
+            : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10 pt-8 border-t border-line',
+        ]}
+      >
+        <div>
+          <h2 class="font-semibold text-fg mb-3">Details</h2>
+          <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2">
+            {
+              details.map((d) => (
+                <>
+                  <dt class="text-fg-3">{d.label}</dt>
+                  <dd class="text-fg-2 text-right break-words">{d.value}</dd>
+                </>
+              ))
+            }
+          </dl>
+        </div>
+
+        {
+          product.licenses.length > 0 && (
+            <div>
+              <h2 class="font-semibold text-fg mb-3">License</h2>
+              <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2">
+                {product.licenses.map((l) => (
+                  <>
+                    <dt class="text-fg-3">{l.label.replace('-', ' ')}</dt>
+                    <dd class="text-right break-words">
+                      {l.url ? (
+                        <a href={l.url} class="text-fg-2 hover:text-fg underline underline-offset-2 decoration-line-2" target="_blank" rel="noopener noreferrer">
+                          {l.name}
+                        </a>
+                      ) : (
+                        <span class="text-fg-2">{l.name}</span>
+                      )}
+                    </dd>
+                  </>
+                ))}
+              </dl>
+            </div>
+          )
+        }
+
+        {
+          product.contributors.length > 0 && (
+            <div>
+              <h2 class="font-semibold text-fg mb-3">Contributors</h2>
+              <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 gap-y-2">
+                {product.contributors.map((c) => (
+                  <>
+                    <dt class="text-fg-2">{c.name}</dt>
+                    <dd class="text-fg-3 text-right break-words">{c.role}</dd>
+                  </>
+                ))}
+              </dl>
+            </div>
+          )
+        }
+
+        <div>
+          <h2 class="font-semibold text-fg mb-1.5">Support</h2>
+          <p class="text-fg-3 leading-relaxed mb-3">Stuck on setup or found a bug? Ask in the Discord.</p>
+          <a href={SITE.discord} class="inline-flex items-center gap-1.5 text-fg hover:text-brand-2 transition-colors" target="_blank" rel="noopener noreferrer">
+            Join the Discord
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" /></svg>
+          </a>
+        </div>
+      </aside>
+    </div>
+
+    {
+      related.length > 0 && (
+        <section class="mt-24" aria-labelledby="related-heading">
+          <div class="flex items-end justify-between gap-6 mb-6">
+            <h2 id="related-heading" class="font-display text-2xl font-bold tracking-tight text-fg">
+              More from Dev Equip
+            </h2>
+            <a href={url('/marketplace/')} class="link-arrow text-sm">
+              View all
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d={ARROW} />
+              </svg>
+            </a>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-8">
+            {related.map((p) => <ProductCard product={p} href={url(`/products/${p.id}/`)} />)}
+          </div>
+        </section>
+      )
+    }
+  </div>
+</Layout>
+
+<script>
+  const main = document.getElementById('gallery-main') as HTMLImageElement | null;
+  const thumbs = [...document.querySelectorAll<HTMLButtonElement>('.gallery-thumb')];
+  for (const thumb of thumbs) {
+    thumb.addEventListener('click', () => {
+      if (!main) return;
+      main.src = thumb.dataset.src!;
+      main.width = Number(thumb.dataset.width);
+      main.height = Number(thumb.dataset.height);
+      for (const t of thumbs) t.setAttribute('aria-pressed', String(t === thumb));
+    });
+  }
+
+  const variantSelect = document.getElementById('variant-select') as HTMLSelectElement | null;
+  const variantDownload = document.getElementById('variant-download') as HTMLAnchorElement | null;
+  const primaryLink = document.getElementById('primary-link') as HTMLAnchorElement | null;
+  const primaryHref = primaryLink?.href;
+  variantSelect?.addEventListener('change', () => {
+    if (variantDownload) variantDownload.href = variantSelect.value;
+    const store = variantSelect.selectedOptions[0]?.dataset.store;
+    if (primaryLink && primaryHref && primaryLink.target === '_blank') primaryLink.href = store || primaryHref;
+  });
+</script>

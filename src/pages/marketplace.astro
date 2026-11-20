@@ -1,0 +1,36 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Marketplace from '../components/Marketplace.vue';
+import { categories, communityCount, marketplaceItems } from '../lib/catalog';
+// import { url } from '../lib/url';
+
+const items = marketplaceItems();
+const community = communityCount();
+const official = items.length - community;
+---
+
+<Layout
+  title="Marketplace | Dev Equip"
+  description={`Browse ${items.length} game-ready Roblox assets from Dev Equip and trusted community developers: admin panels, donation boards, scripts, interfaces, plugins, 3D models and maps.`}
+  active="marketplace"
+>
+  <section class="container-site pt-10 sm:pt-12">
+    <h1 class="page-title">All products</h1>
+    <p class="page-lead">
+      {
+        community > 0
+          ? `All ${official} Dev Equip assets, free to use in your games, plus ${community} from trusted community developers.`
+          : `Every Dev Equip asset in one place. All ${items.length} are free to use in your games.`
+      }
+    </p>
+    {/*
+    <p class="mt-2 text-sm text-fg-3">
+      Trusted developer? <a href={url('/sell/')} class="text-fg-2 hover:text-fg underline underline-offset-2">List your project on Dev Equip</a>
+    </p>
+    */}
+  </section>
+
+  <section class="container-site pt-8 pb-16">
+    <Marketplace client:load products={items} categories={categories()} />
+  </section>
+</Layout>

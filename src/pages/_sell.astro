@@ -1,0 +1,159 @@
+---
+import Page from '../layouts/Page.astro';
+import { SITE } from '../lib/site';
+import { url } from '../lib/url';
+
+const stores = [
+  {
+    group: 'Robux',
+    intro: 'For buyers who already pay on Roblox. No card or account anywhere else.',
+    items: [
+      {
+        name: 'Roblox Creator Store',
+        href: 'https://create.roblox.com/docs/production/sell-on-creator-store',
+        good: 'Selling plugins and other assets straight from the Creator Store. Roblox handles payment and delivery.',
+        mind: 'Only some asset types can be sold there. Check what Roblox currently allows for yours.',
+      },
+      {
+        name: 'Game pass or developer product',
+        href: 'https://create.roblox.com/docs/production/monetization/game-passes',
+        good: 'Selling for Robux from a small “store” place you own. Earnings can be cashed out through DevEx.',
+        mind: 'Roblox keeps a share of every sale, and you deliver the file yourself after the purchase.',
+      },
+    ],
+  },
+  {
+    group: 'Marketplaces',
+    intro: 'Hosted shops with their own buyers. They deliver the file for you.',
+    items: [
+      {
+        name: 'BuiltByBit',
+        href: 'https://builtbybit.com/',
+        good: 'The biggest marketplace for Roblox and Minecraft resources, so buyers are already looking there.',
+        mind: 'Takes a fee per sale and has its own listing rules.',
+      },
+      {
+        name: 'Gumroad',
+        href: 'https://gumroad.com/',
+        good: 'A product page and checkout in minutes, with file delivery and discount codes built in.',
+        mind: 'Takes a percentage of each sale.',
+      },
+    ],
+  },
+  {
+    group: 'VAT taken care of',
+    intro: 'Worth it if you sell to buyers in the EU: they collect and pay the tax for you.',
+    items: [
+      {
+        name: 'Lemon Squeezy',
+        href: 'https://www.lemonsqueezy.com/',
+        good: 'Acts as the seller, so EU VAT, invoices and card payments are handled for you.',
+        mind: 'Higher fee per sale than a plain payment link.',
+      },
+      {
+        name: 'Payhip',
+        href: 'https://payhip.com/',
+        good: 'A simple shop that handles EU VAT on digital products, with a free plan to start on.',
+        mind: 'Takes a percentage on the free plan.',
+      },
+    ],
+  },
+  {
+    group: 'Just a payment link',
+    intro: 'The lowest fees, but you deliver the file and handle the rest yourself.',
+    items: [
+      {
+        name: 'PayPal or Stripe',
+        href: 'https://stripe.com/payments/payment-links',
+        good: 'A single checkout link for a fixed price. Most buyers already have one of the two.',
+        mind: 'You send the product yourself and are responsible for tax where you live.',
+      },
+      {
+        name: 'Ko-fi',
+        href: 'https://ko-fi.com/',
+        good: 'Pay what you want, or free with an optional tip. Keeps it friendly for the community.',
+        mind: 'Better for small amounts and support than for a full product business.',
+      },
+    ],
+  },
+];
+---
+
+<Page
+  title="Sell on Dev Equip"
+  description="Trusted developers can list their own projects in the Dev Equip marketplace, for free or for sale. The money goes straight to you."
+>
+  <h2>How it works</h2>
+  <p>
+    Community products sit in the <a href={url('/marketplace/?from=community')}>marketplace</a> next to Dev Equip's own,
+    with your name on them and a <strong>Community</strong> label so nobody mistakes them for ours.
+  </p>
+  <ol>
+    <li><strong>You're invited.</strong> Listing is for trusted developers. If you'd like to be one, reach out first.</li>
+    <li><strong>You choose the price.</strong> Free for the community, a fixed price, or pay what you want.</li>
+    <li><strong>You choose where it's sold.</strong> Any store below, or one you already use.</li>
+    <li><strong>We add it.</strong> Send the details from the checklist and it goes on the site.</li>
+  </ol>
+  <p>
+    <strong>Dev Equip never touches the money.</strong> The buy button on your product goes straight to your own
+    store, so every sale is between you and the buyer. That also means delivery, support and refunds are yours.
+  </p>
+
+  <h2>Choosing where to sell</h2>
+  <p>
+    There's no wrong answer. Pick what fits the people buying it: Roblox players usually have Robux, studios and older
+    developers usually pay by card. Fees and rules change, so check each store's own page before you decide.
+  </p>
+
+  {
+    stores.map((s) => (
+      <>
+        <h3>{s.group}</h3>
+        <p>{s.intro}</p>
+        <ul>
+          {s.items.map((item) => (
+            <li>
+              <a href={item.href} target="_blank" rel="noopener noreferrer">{item.name}</a>. {item.good}{' '}
+              <em>Keep in mind:</em> {item.mind}
+            </li>
+          ))}
+        </ul>
+      </>
+    ))
+  }
+
+  <p>
+    <strong>Not sure?</strong> For a first paid product, Gumroad or Payhip is the quickest start. If most of your buyers
+    play Roblox, sell for Robux. If you'd rather keep it free, a Ko-fi link lets people tip you anyway.
+  </p>
+
+  <h2>What to send us</h2>
+  <ul>
+    <li><strong>Name and a one-line summary</strong> of the project.</li>
+    <li><strong>A longer description</strong> and its main features.</li>
+    <li><strong>Category</strong>: admin panel, donation board, script, interface, plugin, 3D model or map.</li>
+    <li><strong>Images</strong>: at least one cover, 16:9, and up to a few screenshots.</li>
+    <li><strong>Price</strong>: “Free”, a fixed amount (for example €5 or 250 Robux), or “Pay what you want”.</li>
+    <li><strong>The link</strong>: your store page for a paid product, or the download for a free one.</li>
+    <li><strong>Your name</strong> as it should appear on the product, and the version number.</li>
+    <li><strong>The license</strong> buyers get, and any game settings it needs switched on.</li>
+    <li><strong>Documentation</strong> this can be a video, tutorial, or written guide or open source code.</li>
+  </ul>
+
+  <h2>The rules</h2>
+  <ul>
+    <li>It's your own work, or you have the right to sell or share it.</li>
+    <li>It does what the description says, with no hidden scripts, backdoors or tracking.</li>
+    <li>You support it: answer buyers' questions and handle refunds through your store.</li>
+    <li>Tell us when the price, link or version changes so the listing stays correct.</li>
+  </ul>
+  <p>
+    Dev Equip can remove a listing at any time, for example when it breaks these rules or a buyer reports a problem we
+    can't resolve with you. See the <a href={url('/terms/')}>licenses and terms</a> for the rest.
+  </p>
+
+  <h2>Get listed</h2>
+  <p>
+    Message us in the <a href={SITE.discord} target="_blank" rel="noopener noreferrer">Discord</a> with the checklist above.
+  </p>
+</Page>

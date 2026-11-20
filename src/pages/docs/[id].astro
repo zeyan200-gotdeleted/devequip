@@ -1,0 +1,27 @@
+---
+import { getCollection, render } from 'astro:content';
+import Page from '../../layouts/Page.astro';
+import { products } from '../../lib/catalog';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const docs = await getCollection('docs');
+  return docs.map((doc) => ({ params: { id: doc.id }, props: { doc } }));
+}
+
+const { doc } = Astro.props;
+const { Content } = await render(doc);
+const product = products.find((p) => p.id === doc.data.product);
+---
+
+<Page title={doc.data.title} description={doc.data.description} active="docs">
+  <Content />
+  {
+    product && (
+      <p>
+        <a href={url(`/products/${product.id}/`)}>{product.name} product page</a> ·{' '}
+        <a href={url('/docs/')}>All documentation</a>
+      </p>
+    )
+  }
+</Page>

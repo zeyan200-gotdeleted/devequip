@@ -1,0 +1,96 @@
+---
+import Page from '../layouts/Page.astro';
+import { products } from '../lib/catalog';
+import { SITE } from '../lib/site';
+import { url } from '../lib/url';
+
+const documented = products.filter((p) => p.docs);
+---
+
+<Page
+  title="Documentation"
+  description="How to add Dev Equip products to your game, turn on the game settings they need, and where to find each product's own documentation."
+  active="docs"
+>
+  <h2 id="installing">Installing a product</h2>
+  <p>
+    Every product page lists its download options. Pick whichever suits you; they all give you the same asset.
+  </p>
+
+  <h3>From the Creator Store (recommended)</h3>
+  <ol>
+    <li>On the product page, choose <strong>Get it on the Creator Store</strong> and take the model.</li>
+    <li>In Roblox Studio, open the <strong>Toolbox</strong> and go to <strong>Inventory → My Models</strong>.</li>
+    <li>Click the product to insert it into Workspace.</li>
+  </ol>
+  <p>
+    Some products, such as Nexus Dynamics, are <strong>packages</strong>. To update one, right-click its source module
+    and choose <strong>Get Latest Package</strong>, or turn on <strong>AutoUpdate</strong> in its PackageLink to get
+    updates automatically.
+  </p>
+
+  <h3>From an RBXM file</h3>
+  <ol>
+    <li>Download the <code>.rbxm</code> file from the product page.</li>
+    <li>In Studio, go to <strong>Model → Model</strong> and insert the file anywhere in Workspace.</li>
+  </ol>
+
+  <h3>Maps (RBXL files)</h3>
+  <p>Maps download as a <code>.rbxl</code> place file. Open it directly in Roblox Studio.</p>
+
+  <h3>Scripts and frameworks</h3>
+  <p>
+    Scripts such as Maid, Promise, Signal and Class are single Luau modules. Download the file, or copy it from
+    the <strong>Source code</strong> section of the product page, and put it in a ModuleScript. Modules used on both server
+    and client belong in <code>ReplicatedStorage</code>. Each product page says where its script should go when it
+    needs a specific place.
+  </p>
+
+  <h2 id="game-settings">Game settings</h2>
+  <p>
+    Some products need settings that Roblox switches off by default. The product page lists which ones
+    under <strong>Needs these game settings</strong>. To turn them on:
+  </p>
+  <ul>
+    <li><strong>New Studio:</strong> File → Game Settings → Security</li>
+    <li><strong>Old Studio:</strong> Home → Game Settings → Security</li>
+  </ul>
+  <table>
+    <thead>
+      <tr><th>Setting</th><th>What it's for</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Allow HTTP Requests</td><td>Requests to remote servers</td></tr>
+      <tr><td>Enable Studio Access to API Services</td><td>Using Data Stores</td></tr>
+      <tr><td>Allow Third Party Sales</td><td>Selling third-party UGC assets</td></tr>
+      <tr><td>Allow Third Party Teleports</td><td>Moving players between places</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="licenses">Licenses</h2>
+  <p>
+    Each product page shows its license. Designs, meshes and textures are released
+    under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.en" target="_blank" rel="noopener noreferrer">CC BY-NC-ND 4.0</a>,
+    and source code under
+    the <a href="https://github.com/Dev-Equip/Luau-Frameworks/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>.
+    See <a href={url('/terms/')}>Licenses and usage</a> for what you can and can't do with them.
+  </p>
+
+  <h2 id="product-docs">Product documentation</h2>
+  <p>These products have their own, more detailed documentation:</p>
+  <ul>
+    {
+      documented.map((p) => (
+        <li>
+          <a href={url(p.docs!)}>{p.name}</a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <h2 id="help">Still stuck?</h2>
+  <p>
+    Ask in the <a href={SITE.discord} target="_blank" rel="noopener noreferrer">Dev Equip Discord</a>, where staff and
+    other developers can help, or see <a href={url('/support/')}>Support</a>.
+  </p>
+</Page>
